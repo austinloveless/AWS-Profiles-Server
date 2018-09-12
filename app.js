@@ -24,16 +24,11 @@ const s3 = new aws.S3({
   }
 });
 
-// This is middleware that will process the multipart file upload
 const upload = multer({
   storage: multerS3({
-    s3, // The s3 instance from above
-    // The name of your S3 bucket
+    s3,
     bucket: process.env.AWS_BUCKET,
     key: (request, file, next) => {
-      // This names the file. This example prepends the
-      // UNIX timestamp to original name of the file,
-      // which helps with duplicate file names
       next(null, `files/${Date.now()}_${file.originalname}`);
     }
   })
@@ -46,7 +41,6 @@ app.get("/api/profile", (req, res) => {
 });
 
 app.post("/api/profile", (req, res) => {
-  console.log("in api profile");
   const profile = req.body.profiles.profile;
   profile.ssn = ssnUtils.hashSSN(profile.ssn);
   db.profile
@@ -60,7 +54,6 @@ app.post("/api/profile", (req, res) => {
 });
 
 app.post("/api/profile/profileImage", upload.single("image"), (req, res) => {
-  console.log("test", req.file);
   res.status(200).json(req.file);
 });
 
